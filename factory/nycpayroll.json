@@ -1,0 +1,17 @@
+{
+	"name": "nycpayroll",
+	"properties": {
+		"globalParameters": {
+			"dataflow_fiscalyear": {
+				"type": "int",
+				"value": 1998
+			}
+		}
+	},
+	"location": "westeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "2b6c00fd-80c9-470c-98c4-cffc6cb43516",
+		"tenantId": "e8ca38cc-f256-4376-84d2-90d32216353e"
+	}
+}

@@ -1,0 +1,56 @@
+{
+	"name": "dataflow load title masterdata to synapse sqlpool table",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dataset_adls_nycpayroll_TitleMaster",
+						"type": "DatasetReference"
+					},
+					"name": "ADLSTitleMasterData"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "dataset_synapse_nycpayroll_TitleMd",
+						"type": "DatasetReference"
+					},
+					"name": "SynapseTitleMasterdata"
+				}
+			],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          TitleCode as integer,",
+				"          TitleDescription as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> ADLSTitleMasterData",
+				"ADLSTitleMasterData sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          TitleCode as string,",
+				"          TitleDescription as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     staged: true,",
+				"     allowCopyCommand: true,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          TitleCode,",
+				"          TitleDescription",
+				"     )) ~> SynapseTitleMasterdata"
+			]
+		}
+	}
+}

@@ -1,0 +1,35 @@
+{
+	"name": "pipeline load 2021 Payroll into SQLDB",
+	"properties": {
+		"description": "load 2021 Payroll data into transaction table in the SQL DB",
+		"activities": [
+			{
+				"name": "load 2021 Payroll data",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflow load 2021 Payroll Data to SQL DB transaction",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-09-10T12:39:57Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

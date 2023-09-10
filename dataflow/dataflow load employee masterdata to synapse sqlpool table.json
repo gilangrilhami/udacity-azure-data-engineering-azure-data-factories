@@ -1,0 +1,59 @@
+{
+	"name": "dataflow load employee masterdata to synapse sqlpool table",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dataset_adls_nycpayroll_EmpMaster",
+						"type": "DatasetReference"
+					},
+					"name": "ADLSEmployeeMD"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "dataset_synapse_nycpayroll_EmpMd",
+						"type": "DatasetReference"
+					},
+					"name": "SynapseEmployeeMD"
+				}
+			],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          EmployeeID as integer,",
+				"          LastName as string,",
+				"          FirstName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> ADLSEmployeeMD",
+				"ADLSEmployeeMD sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          EmployeeID as string,",
+				"          LastName as string,",
+				"          FirstName as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     staged: true,",
+				"     allowCopyCommand: true,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          EmployeeID,",
+				"          LastName,",
+				"          FirstName",
+				"     )) ~> SynapseEmployeeMD"
+			]
+		}
+	}
+}

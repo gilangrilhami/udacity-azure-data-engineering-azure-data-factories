@@ -1,0 +1,124 @@
+{
+	"name": "dataflow load 2020 Payroll Data to SQL DB summary",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dataset_asls_nycpayroll_2020",
+						"type": "DatasetReference"
+					},
+					"name": "ADLS2020PayrollData"
+				},
+				{
+					"dataset": {
+						"referenceName": "dataset_sqldb_nycpayroll_TransactionTable",
+						"type": "DatasetReference"
+					},
+					"name": "SQLDB2021PayrollData"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "dataset_synapse_nycpayroll_summary",
+						"type": "DatasetReference"
+					},
+					"name": "SQLDBSummaryTable"
+				}
+			],
+			"transformations": [
+				{
+					"name": "UnionPayrollData"
+				},
+				{
+					"name": "FilterFiscalYear"
+				},
+				{
+					"name": "DerivedTotalPaidColumn"
+				},
+				{
+					"name": "AggregateTotalPaid"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     dataflow_param_fiscalyear as integer (1998)",
+				"}",
+				"source(output(",
+				"          FiscalYear as integer,",
+				"          PayrollNumber as integer,",
+				"          AgencyID as integer,",
+				"          AgencyName as string,",
+				"          EmployeeID as integer,",
+				"          LastName as string,",
+				"          FirstName as string,",
+				"          AgencyStartDate as date 'MM/dd/yyyy',",
+				"          WorkLocationBorough as string,",
+				"          TitleCode as string,",
+				"          TitleDescription as string,",
+				"          LeaveStatusasofJune30 as string,",
+				"          BaseSalary as float,",
+				"          PayBasis as string,",
+				"          RegularHours as float,",
+				"          RegularGrossPaid as float,",
+				"          OTHours as float,",
+				"          TotalOTPaid as float,",
+				"          TotalOtherPay as float",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> ADLS2020PayrollData",
+				"source(output(",
+				"          FiscalYear as integer,",
+				"          PayrollNumber as integer,",
+				"          AgencyID as integer,",
+				"          AgencyName as string,",
+				"          EmployeeID as integer,",
+				"          LastName as string,",
+				"          FirstName as string,",
+				"          AgencyStartDate as date,",
+				"          WorkLocationBorough as string,",
+				"          TitleCode as string,",
+				"          TitleDescription as string,",
+				"          LeaveStatusasofJune30 as string,",
+				"          BaseSalary as double,",
+				"          PayBasis as string,",
+				"          RegularHours as double,",
+				"          RegularGrossPaid as double,",
+				"          OTHours as double,",
+				"          TotalOTPaid as double,",
+				"          TotalOtherPay as double",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> SQLDB2021PayrollData",
+				"ADLS2020PayrollData, SQLDB2021PayrollData union(byName: true)~> UnionPayrollData",
+				"UnionPayrollData filter(toInteger(FiscalYear) >= $dataflow_param_fiscalyear) ~> FilterFiscalYear",
+				"FilterFiscalYear derive(TotalPaid = RegularGrossPaid+TotalOTPaid+TotalOtherPay) ~> DerivedTotalPaidColumn",
+				"DerivedTotalPaidColumn aggregate(groupBy(AgencyName,",
+				"          FiscalYear),",
+				"     TotalPaid = sum(TotalOTPaid)) ~> AggregateTotalPaid",
+				"AggregateTotalPaid sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          FiscalYear as integer,",
+				"          AgencyName as string,",
+				"          TotalPaid as double",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     staged: true,",
+				"     allowCopyCommand: true,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> SQLDBSummaryTable"
+			]
+		}
+	}
+}
