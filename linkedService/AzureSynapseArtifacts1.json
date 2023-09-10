@@ -1,0 +1,12 @@
+{
+	"name": "AzureSynapseArtifacts1",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSynapseArtifacts",
+		"typeProperties": {
+			"endpoint": "https://nycpayroll.dev.azuresynapse.net",
+			"authentication": "MSI",
+			"workspaceResourceId": "/subscriptions/4a19fe32-52c2-4ff7-832f-11f08d18288b/resourceGroups/udacity-project/providers/Microsoft.Synapse/workspaces/nycpayroll"
+		}
+	}
+}
